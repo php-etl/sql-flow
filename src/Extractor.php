@@ -3,11 +3,13 @@
 namespace Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Bucket\AcceptanceResultBucket;
+use Kiboko\Component\Bucket\EmptyResultBucket;
 use Kiboko\Contract\Pipeline\ExtractorInterface;
+use Kiboko\Contract\Pipeline\FlushableInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class Extractor implements ExtractorInterface
+class Extractor implements ExtractorInterface, FlushableInterface
 {
     private LoggerInterface $logger;
 
@@ -51,7 +53,10 @@ class Extractor implements ExtractorInterface
         } catch (\PDOException $exception) {
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
         }
+    }
 
+    public function flush(): EmptyResultBucket
+    {
         try {
             foreach ($this->afterQueries as $afterQuery) {
                 $this->connection->exec($afterQuery);
@@ -59,5 +64,7 @@ class Extractor implements ExtractorInterface
         } catch (\PDOException $exception) {
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
         }
+
+        return new EmptyResultBucket();
     }
 }
