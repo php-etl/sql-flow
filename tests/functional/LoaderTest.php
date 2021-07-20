@@ -10,121 +10,181 @@ class LoaderTest extends TestCase
 {
     use LoaderAssertTrait;
 
-    private const DATABASE_PATH = __DIR__.'/dbtest2.sqlite';
+    private const DATABASE_PATH = __DIR__ . '/dbtest2.sqlite';
+    private \PDO $connection;
 
     protected function setUp(): void
     {
         parent::setUp();
-        copy(__DIR__.'/dbtest.sqlite',self::DATABASE_PATH);
+        copy(__DIR__ . '/dbtest.sqlite', self::DATABASE_PATH);
+        $this->connection = new \PDO('sqlite:' . self::DATABASE_PATH);
     }
 
-    public static function tearDownAfterClass(): void
-    {
-        $db = new \PDO('sqlite:' . self::DATABASE_PATH);
-        $db->exec('DROP TABLE IF EXISTS foo');
-    }
-
-    public function testBasicLoader(): void
+    public function testLoadWithNamedParameters(): void
     {
         $loader = new Loader(
-            connection: new \PDO('sqlite:' . self::DATABASE_PATH),
-            query: 'INSERT INTO user VALUES (?,"Julien")'
+            connection: $this->connection,
+            query: 'INSERT INTO user (firstname,lastname,nationality) VALUES (:firstname,:lastname,:nationality)'
         );
-        $this->assertLoaderLoadsLike(
+        $this->assertLoaderLoadsExactly(
             [
                 [
-                    'id' => '1',
-                    'name' => 'JulienLePokemon',
+                    'firstname' => 'jul',
+                    'lastname' => 'marseille',
+                    'nationality' => 'french',
                 ],
-            ],[
+            ],
+            [
                 [
-                    'id' => '1',
-                    'name' => 'JulienLePokemon',
+                    'firstname' => 'jul',
+                    'lastname' => 'marseille',
+                    'nationality' => 'french',
                 ],
             ],
             $loader,
         );
     }
 
-//    public function testExtractorWithBeforeQueries(): void
-//    {
-//        $extractor = new Loader(
-//            connection: new \PDO('sqlite:' . self::DATABASE_PATH),
-//            query: 'SELECT * FROM foo',
-//            beforeQueries: [
-//                'CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL, value VARCHAR(255) NOT NULL)',
-//                'INSERT INTO foo (id, value) VALUES (1, "Lorem ipsum dolor")',
-//                'INSERT INTO foo (id, value) VALUES (2, "Sit amet consecutir")',
-//            ]
-//        );
-//        $this->assertExtractorExtractsExactly(
-//            [
-//                [
-//                    'id' => '1',
-//                    'value' => 'Lorem ipsum dolor',
-//                ],
-//                [
-//                    'id' => '2',
-//                    'value' => 'Sit amet consecutir',
-//                ]
-//            ],
-//            $extractor,
-//        );
-//    }
-//
-//    public function testExtractorWithAfterQueries(): void
-//    {
-//        $connection = new \PDO('sqlite:' . self::DATABASE_PATH);
-//        $extractor = new Loader(
-//            connection: $connection,
-//            query: 'SELECT * FROM foo',
-//            beforeQueries: [
-//                'CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL, value VARCHAR(255) NOT NULL)',
-//            ],
-//            afterQueries: [
-//                'DROP TABLE foo'
-//            ]
-//        );
-//        $this->assertExtractorExtractsExactly(
-//            new \EmptyIterator(),
-//            $extractor
-//        );
-//        $query = $connection->query("SELECT name FROM sqlite_master WHERE type='table' AND name='foo'");
-//        $result = $query->fetch(\PDO::FETCH_NAMED);
-//        $this->assertFalse($result);
-//    }
-//
-//    public function testExtractorQueryWithNamedParameters(): void
-//    {
-//        $extractor = new Loader(
-//            connection: new \PDO('sqlite:' . self::DATABASE_PATH),
-//            query: 'SELECT * FROM foo WHERE id = :id',
-//            parameters: [
-//                [
-//                    'key' => 'id',
-//                    'value' => 1
-//                ]
-//            ],
-//            beforeQueries: [
-//                'CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL, value VARCHAR(255) NOT NULL)',
-//                'INSERT INTO foo (id, value) VALUES (1, "Lorem ipsum dolor")',
-//                'INSERT INTO foo (id, value) VALUES (2, "Sit amet consecutir")',
-//            ],
-//        );
-//        $this->assertExtractorExtractsExactly(
-//            [
-//                [
-//                    'id' => '1',
-//                    'value' => 'Lorem ipsum dolor',
-//                ]
-//            ],
-//            $extractor
-//        );
-//    }
+    public function testLoadWithUnamedParameters(): void
+    {
+        $loader = new Loader(
+            connection: $this->connection,
+            query: 'INSERT INTO user(firstname, lastname, nationality) VALUES ("jul","marseille","french")'
+        );
+        $this->assertLoaderLoadsExactly(
+            [
+                [
+                    'firstname' => 'jul',
+                    'lastname' => 'marseille',
+                    'nationality' => 'french',
+                ],
+            ],
+            [
+                [
+                    'firstname' => 'jul',
+                    'lastname' => 'marseille',
+                    'nationality' => 'french',
+                ],
+            ],
+            $loader,
+        );
+    }
+
+    public function loadProvider()
+    {
+        return [
+            [
+                'coca',2
+            ],
+            [
+                'zero',0
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider loadProvider
+     */
+    public function testLoadWithBeforeQueries($name,$price): void
+    {
+        $loader = new Loader(
+            connection: $this->connection,
+            query: 'INSERT INTO product (name,price) VALUES (:name,:price)',
+            parameters: [
+                [
+                    'key' => 'name',
+                    'value' => $name
+                ],
+                [
+                    'key' => 'price',
+                    'value' => $price
+                ],
+            ],
+            beforeQueries: [
+                'CREATE TABLE IF NOT EXISTS product (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name VARCHAR(255) NOT NULL,
+                    price INTEGER NOT NULL
+                )',
+            ],
+        );
+        $this->assertLoaderLoadsExactly(
+            [
+                [
+                    'name' => $name,
+                    'price' => $price,
+                ],
+            ],
+            [
+                [
+                    'name' => $name,
+                    'price' => $price,
+                ],
+            ],
+            $loader,
+        );
+
+        $query = $this->connection->query("SELECT name FROM sqlite_master WHERE type='table' AND name='product'");
+        $result = $query->fetch(\PDO::FETCH_NAMED);
+
+        $this->assertSame($result['name'],'product');
+    }
+
+    /**
+     * @dataProvider loadProvider
+     */
+    public function testLoadWithAfterQueries($name,$price): void
+    {
+        $loader = new Loader(
+            connection: $this->connection,
+            query: 'INSERT INTO product (name,price) VALUES (:name,:price)',
+            parameters: [
+                [
+                    'key' => 'name',
+                    'value' => $name
+                ],
+                [
+                    'key' => 'price',
+                    'value' => $price
+                ],
+            ],
+            beforeQueries: [
+                'CREATE TABLE IF NOT EXISTS product (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name VARCHAR(255) NOT NULL,
+                    price INTEGER NOT NULL
+                )',
+            ],
+            afterQueries: [
+                'DROP TABLE product',
+            ],
+        );
+        $this->assertLoaderLoadsExactly(
+            [
+                [
+                    'name' => $name,
+                    'price' => $price,
+                ],
+            ],
+            [
+                [
+                    'name' => $name,
+                    'price' => $price,
+                ],
+            ],
+            $loader,
+        );
+
+        $query = $this->connection->query("SELECT name FROM sqlite_master WHERE type='table' AND name='product'");
+        $result = $query->fetch(\PDO::FETCH_NAMED);
+
+        $this->assertFalse($result);
+    }
 
     protected function tearDown(): void
     {
         parent::tearDown();
+        chmod(self::DATABASE_PATH, 0644);
         unlink(self::DATABASE_PATH);
     }
 }

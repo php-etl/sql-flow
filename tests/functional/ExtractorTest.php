@@ -90,6 +90,7 @@ class ExtractorTest extends TestCase
             query: 'SELECT * FROM foo',
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL, value VARCHAR(255) NOT NULL)',
+                'INSERT INTO foo (id,value) VALUES (1,"test")',
             ],
             afterQueries: [
                'DROP TABLE foo'
