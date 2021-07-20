@@ -18,8 +18,7 @@ class Extractor implements ExtractorInterface
         private array $beforeQueries = [],
         private array $afterQueries = [],
         ?LoggerInterface $logger = null
-    )
-    {
+    ) {
         $this->logger = $logger ?? new NullLogger();
     }
 
@@ -39,14 +38,15 @@ class Extractor implements ExtractorInterface
 
             if ($this->parameters) {
                 foreach ($this->parameters as $parameter) {
-                    $stmt->bindParam(":".$parameter["key"], $parameter["value"]);
+                    $stmt->bindParam(is_string($parameter["key"]) ? ":".$parameter["key"] : $parameter["key"], $parameter["value"]);
                 }
             }
 
             $stmt->execute();
 
-            foreach ($stmt->fetchAll(\PDO::FETCH_NAMED) as $item) {
-                yield new AcceptanceResultBucket($item);
+            $results = $stmt->fetchAll(\PDO::FETCH_NAMED);
+            while ($row = array_shift($results)) {
+                yield new AcceptanceResultBucket($row);
             }
         } catch (\PDOException $exception) {
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
