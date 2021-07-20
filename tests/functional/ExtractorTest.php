@@ -10,12 +10,6 @@ class ExtractorTest extends TestCase
 {
     use ExtractorAssertTrait;
 
-    public static function tearDownAfterClass(): void
-    {
-        $db = new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite');
-        $db->exec('DROP TABLE IF EXISTS foo');
-    }
-
     public function testBasicExtractor(): void
     {
         $extractor = new Extractor(
@@ -98,7 +92,12 @@ class ExtractorTest extends TestCase
         );
 
         $this->assertExtractorExtractsExactly(
-            new \EmptyIterator(),
+            [
+                [
+                    'id' => '1',
+                    'value' => 'test'
+                ]
+            ],
             $extractor
         );
 
@@ -164,5 +163,11 @@ class ExtractorTest extends TestCase
             ],
             $extractor
         );
+    }
+
+    public function tearDown(): void
+    {
+        $db = new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite');
+        $db->exec('DROP TABLE IF EXISTS foo');
     }
 }

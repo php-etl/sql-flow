@@ -3,6 +3,7 @@
 namespace Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Bucket\AcceptanceResultBucket;
+use Kiboko\Component\Bucket\EmptyResultBucket;
 use Kiboko\Contract\Pipeline\ExtractorInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
