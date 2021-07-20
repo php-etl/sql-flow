@@ -92,7 +92,12 @@ class ExtractorTest extends TestCase
         );
 
         $this->assertExtractorExtractsExactly(
-            new \EmptyIterator(),
+            [
+                [
+                    'id' => '1',
+                    'value' => 'test'
+                ]
+            ],
             $extractor
         );
 
