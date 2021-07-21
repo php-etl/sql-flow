@@ -32,8 +32,7 @@ class Lookup implements TransformerInterface, FlushableInterface
         private array $beforeQueries = [],
         private array $afterQueries = [],
         ?LoggerInterface $logger = null
-    )
-    {
+    ) {
         $this->logger = $logger ?? new NullLogger();
     }
 

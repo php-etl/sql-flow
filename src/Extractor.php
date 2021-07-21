@@ -54,7 +54,7 @@ class Extractor implements ExtractorInterface
             $stmt->execute();
 
             $results = $stmt->fetchAll(\PDO::FETCH_NAMED);
-            if($results === false) {
+            if ($results === false) {
                 yield new EmptyResultBucket();
             } else {
                 while ($row = array_shift($results)) {

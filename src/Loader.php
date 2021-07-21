@@ -53,7 +53,6 @@ class Loader implements LoaderInterface, FlushableInterface
         $input = yield;
         try {
             do {
-
                 $stmt = $this->connection->prepare($this->query);
 
                 if ($this->parameters) {
@@ -63,11 +62,10 @@ class Loader implements LoaderInterface, FlushableInterface
                 }
 
                 $stmt->execute();
-            } while($input = yield new \Kiboko\Component\Bucket\AcceptanceResultBucket($input));
+            } while ($input = yield new \Kiboko\Component\Bucket\AcceptanceResultBucket($input));
         } catch (\PDOException $exception) {
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
         }
-
     }
 
     /**
@@ -83,6 +81,5 @@ class Loader implements LoaderInterface, FlushableInterface
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
         }
         return new EmptyResultBucket();
-
     }
 }
