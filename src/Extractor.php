@@ -12,6 +12,14 @@ class Extractor implements ExtractorInterface
 {
     private LoggerInterface $logger;
 
+    /**
+     * @param \PDO $connection
+     * @param string $query
+     * @param array<int,array> $parameters
+     * @param array<int,string> $beforeQueries
+     * @param array<int,string> $afterQueries
+     * @param \Psr\Log\LoggerInterface|null $logger
+     */
     public function __construct(
         private \PDO $connection,
         private string $query,
@@ -46,8 +54,13 @@ class Extractor implements ExtractorInterface
             $stmt->execute();
 
             $results = $stmt->fetchAll(\PDO::FETCH_NAMED);
-            while ($row = array_shift($results)) {
-                yield new AcceptanceResultBucket($row);
+            if($results === false) {
+                //TODO throw an exception ?
+                yield new EmptyResultBucket();
+            } else {
+                while ($row = array_shift($results)) {
+                    yield new AcceptanceResultBucket($row);
+                }
             }
         } catch (\PDOException $exception) {
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);

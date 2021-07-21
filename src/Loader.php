@@ -9,10 +9,22 @@ use Kiboko\Contract\Pipeline\LoaderInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
+/**
+ * @template Type
+ * @implements FlushableInterface<Type>
+ */
 class Loader implements LoaderInterface, FlushableInterface
 {
     private LoggerInterface $logger;
 
+    /**
+     * @param \PDO $connection
+     * @param string $query
+     * @param array<int,array> $parameters
+     * @param array<int,string> $beforeQueries
+     * @param array<int,string> $afterQueries
+     * @param \Psr\Log\LoggerInterface|null $logger
+     */
     public function __construct(
         private \PDO $connection,
         private string $query,
@@ -24,6 +36,9 @@ class Loader implements LoaderInterface, FlushableInterface
         $this->logger = $logger ?? new NullLogger();
     }
 
+    /**
+     * @return \Generator<mixed>
+     */
     public function load(): \Generator
     {
         try {
@@ -55,6 +70,9 @@ class Loader implements LoaderInterface, FlushableInterface
 
     }
 
+    /**
+     * @return ResultBucketInterface<Type>
+     */
     public function flush(): ResultBucketInterface
     {
         try {

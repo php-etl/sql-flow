@@ -28,7 +28,7 @@ class LookupTest extends TestCase
      */
     public function testLookupWithMapper($mapper): void
     {
-        $lookup = new Lookup($mapper);
+        $lookup = new Lookup($this->connection,$mapper);
 
         $this->assertTransformerTransformsExactly(
             [
