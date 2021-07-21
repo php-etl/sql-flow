@@ -10,10 +10,20 @@ class ExtractorTest extends TestCase
 {
     use ExtractorAssertTrait;
 
-    public function testBasicExtractor(): void
+    private const DATABASE_PATH = __DIR__ . '/dbtest2.sqlite';
+    private \PDO $connection;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        copy(__DIR__ . '/fixtures/dbtest.sqlite', self::DATABASE_PATH);
+        $this->connection = new \PDO('sqlite:' . self::DATABASE_PATH);
+    }
+
+    public function testExtract(): void
     {
         $extractor = new Extractor(
-            connection: new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite'),
+            connection: $this->connection,
             query: 'SELECT * FROM user'
         );
 
@@ -48,10 +58,10 @@ class ExtractorTest extends TestCase
         );
     }
 
-    public function testExtractorWithBeforeQueries(): void
+    public function testExtractWithBeforeQueries(): void
     {
         $extractor = new Extractor(
-            connection: new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite'),
+            connection: $this->connection,
             query: 'SELECT * FROM foo',
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL, value VARCHAR(255) NOT NULL)',
@@ -75,12 +85,10 @@ class ExtractorTest extends TestCase
         );
     }
 
-    public function testExtractorWithAfterQueries(): void
+    public function testExtractWithAfterQueries(): void
     {
-        $connection = new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite');
-
         $extractor = new Extractor(
-            connection: $connection,
+            connection: $this->connection,
             query: 'SELECT * FROM foo',
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL, value VARCHAR(255) NOT NULL)',
@@ -101,16 +109,16 @@ class ExtractorTest extends TestCase
             $extractor
         );
 
-        $query = $connection->query("SELECT name FROM sqlite_master WHERE type='table' AND name='foo'");
+        $query = $this->connection->query("SELECT name FROM sqlite_master WHERE type='table' AND name='foo'");
         $result = $query->fetch(\PDO::FETCH_NAMED);
 
         $this->assertFalse($result);
     }
 
-    public function testExtractorQueryWithNamedParameters(): void
+    public function testExtractWithBeforeQueriesAndNamedParameters(): void
     {
         $extractor = new Extractor(
-            connection: new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite'),
+            connection: $this->connection,
             query: 'SELECT * FROM foo WHERE id = :id',
             parameters: [
                 [
@@ -136,10 +144,10 @@ class ExtractorTest extends TestCase
         );
     }
 
-    public function testExtractorQueryWithUnnamedParameters(): void
+    public function testExtractWithBeforeQueriesAndUnameddParameters(): void
     {
         $extractor = new Extractor(
-            connection: new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite'),
+            connection: $this->connection,
             query: 'SELECT * FROM foo WHERE id = ?',
             parameters: [
                 [
@@ -165,9 +173,10 @@ class ExtractorTest extends TestCase
         );
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
-        $db = new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite');
-        $db->exec('DROP TABLE IF EXISTS foo');
+        parent::tearDown();
+        chmod(self::DATABASE_PATH, 0644);
+        unlink(self::DATABASE_PATH);
     }
 }

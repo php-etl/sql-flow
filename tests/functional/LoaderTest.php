@@ -1,4 +1,4 @@
-<?php /** @noinspection SqlResolve */
+<?php
 
 namespace functional\Kiboko\Component\Flow\SQL;
 
@@ -16,7 +16,7 @@ class LoaderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        copy(__DIR__ . '/dbtest.sqlite', self::DATABASE_PATH);
+        copy(__DIR__ . '/fixtures/dbtest.sqlite', self::DATABASE_PATH);
         $this->connection = new \PDO('sqlite:' . self::DATABASE_PATH);
     }
 
@@ -70,7 +70,7 @@ class LoaderTest extends TestCase
         );
     }
 
-    public function loadProvider()
+    public function loadProvider(): array
     {
         return [
             [
