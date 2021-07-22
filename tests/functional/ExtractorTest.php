@@ -196,12 +196,10 @@ class ExtractorTest extends TestCase
         $extractor = new Extractor(
             connection: $this->connection,
             query: 'SELECT * FROM foo WHERE id = :id',
-            parameters: [
-                [
-                    'key' => 'id',
-                    'value' => 1
-                ]
-            ],
+            parametersBinder: function (\PDOStatement $statement) {
+                    $var = 1;
+                    $statement->bindParam('id', $var);
+            },
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL, value VARCHAR(255) NOT NULL)',
                 'INSERT INTO foo (id, value) VALUES (1, "Lorem ipsum dolor")',
@@ -220,17 +218,15 @@ class ExtractorTest extends TestCase
         );
     }
 
-    public function testExtractWithBeforeQueriesAndUnameddParameters(): void
+    public function testExtractWithBeforeQueriesAndUnnamedParameters(): void
     {
         $extractor = new Extractor(
             connection: $this->connection,
             query: 'SELECT * FROM foo WHERE id = ?',
-            parameters: [
-                [
-                    'key' => 1,
-                    'value' => 1
-                ]
-            ],
+            parametersBinder: function (\PDOStatement $statement) {
+                $var = 1;
+                $statement->bindParam(1, $var);
+            },
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL, value VARCHAR(255) NOT NULL)',
                 'INSERT INTO foo (id, value) VALUES (1, "Lorem ipsum dolor")',

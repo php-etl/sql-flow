@@ -45,12 +45,13 @@ class LoaderTest extends TestCase
         );
     }
 
-    public function testLoadWithUnamedParameters(): void
+    public function testLoadWithoutParameters(): void
     {
         $loader = new Loader(
             connection: $this->connection,
             query: 'INSERT INTO user(firstname, lastname, nationality) VALUES ("jul","marseille","french")'
         );
+
         $this->assertLoaderLoadsExactly(
             [
                 [
@@ -74,10 +75,10 @@ class LoaderTest extends TestCase
     {
         return [
             [
-                'coca',2
+                'coca', 2
             ],
             [
-                'zero',0
+                'zero', 0
             ]
         ];
     }
@@ -89,17 +90,11 @@ class LoaderTest extends TestCase
     {
         $loader = new Loader(
             connection: $this->connection,
-            query: 'INSERT INTO product (name,price) VALUES (:name,:price)',
-            parameters: [
-                [
-                    'key' => 'name',
-                    'value' => $name
-                ],
-                [
-                    'key' => 'price',
-                    'value' => $price
-                ],
-            ],
+            query: 'INSERT INTO product (name, price) VALUES (:name, :price)',
+            parametersBinder: function (\PDOStatement $statement, $input) {
+                $statement->bindParam('name', $input["name"]);
+                $statement->bindParam('price', $input["price"]);
+            },
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS product (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -108,6 +103,7 @@ class LoaderTest extends TestCase
                 )',
             ],
         );
+
         $this->assertLoaderLoadsExactly(
             [
                 [
@@ -137,17 +133,11 @@ class LoaderTest extends TestCase
     {
         $loader = new Loader(
             connection: $this->connection,
-            query: 'INSERT INTO product (name,price) VALUES (:name,:price)',
-            parameters: [
-                [
-                    'key' => 'name',
-                    'value' => $name
-                ],
-                [
-                    'key' => 'price',
-                    'value' => $price
-                ],
-            ],
+            query: 'INSERT INTO product (name, price) VALUES (:name, :price)',
+            parametersBinder: function (\PDOStatement $statement, $input) {
+                $statement->bindParam('name', $input["name"]);
+                $statement->bindParam('price', $input["price"]);
+            },
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS product (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -159,6 +149,7 @@ class LoaderTest extends TestCase
                 'DROP TABLE product',
             ],
         );
+
         $this->assertLoaderLoadsExactly(
             [
                 [
@@ -175,6 +166,9 @@ class LoaderTest extends TestCase
             $loader,
         );
 
+        /**
+         * Check if the table is dropped
+         */
         $query = $this->connection->query("SELECT name FROM sqlite_master WHERE type='table' AND name='product'");
         $result = $query->fetch(\PDO::FETCH_NAMED);
 

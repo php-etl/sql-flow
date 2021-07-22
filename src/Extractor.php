@@ -11,11 +11,13 @@ use Psr\Log\NullLogger;
 class Extractor implements ExtractorInterface
 {
     private LoggerInterface $logger;
+    /** @var callable|null */
+    private $parametersBinder;
 
     /**
      * @param \PDO $connection
      * @param string $query
-     * @param array<int,array> $parameters
+     * @param callable|null $parametersBinder
      * @param array<int,string> $beforeQueries
      * @param array<int,string> $afterQueries
      * @param \Psr\Log\LoggerInterface|null $logger
@@ -23,12 +25,13 @@ class Extractor implements ExtractorInterface
     public function __construct(
         private \PDO $connection,
         private string $query,
-        private array $parameters = [],
+        callable $parametersBinder = null,
         private array $beforeQueries = [],
         private array $afterQueries = [],
         ?LoggerInterface $logger = null
     ) {
         $this->logger = $logger ?? new NullLogger();
+        $this->parametersBinder = $parametersBinder;
     }
 
     public function extract(): iterable
@@ -43,23 +46,17 @@ class Extractor implements ExtractorInterface
         }
 
         try {
-            $stmt = $this->connection->prepare($this->query);
+            $statement = $this->connection->prepare($this->query);
 
-            if ($this->parameters) {
-                foreach ($this->parameters as $parameter) {
-                    $stmt->bindParam(is_string($parameter["key"]) ? ":".$parameter["key"] : $parameter["key"], $parameter["value"]);
-                }
+            if ($this->parametersBinder !== null) {
+                ($this->parametersBinder)($statement);
             }
 
-            $stmt->execute();
+            $statement->execute();
 
-            $results = $stmt->fetchAll(\PDO::FETCH_NAMED);
-            if ($results === false) {
-                yield new EmptyResultBucket();
-            } else {
-                while ($row = array_shift($results)) {
-                    yield new AcceptanceResultBucket($row);
-                }
+            $results = $statement->fetchAll(\PDO::FETCH_NAMED);
+            while ($row = array_shift($results)) {
+                yield new AcceptanceResultBucket($row);
             }
         } catch (\PDOException $exception) {
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
