@@ -57,7 +57,11 @@ class ConditionalLoader implements LoaderInterface, FlushableInterface
         $input = yield;
 
         do {
-            ($this->alternatives)($input, $this->connection);
+            try {
+                ($this->alternatives)($input, $this->connection);
+            } catch (\PDOException $exception) {
+                $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
+            }
         } while ($input = yield new AcceptanceResultBucket($input));
     }
 
