@@ -13,7 +13,7 @@ class LookupTest extends TestCase
 {
     use TransformerAssertTrait;
 
-    private const DATABASE_PATH = __DIR__ . '/dbtest2.sqlite';
+    private const DATABASE_PATH = __DIR__ . '/dbtest.sqlite';
     private \PDO $connection;
 
     protected function setUp(): void
@@ -28,7 +28,7 @@ class LookupTest extends TestCase
      */
     public function testLookupWithMapper($mapper): void
     {
-        $lookup = new Lookup($this->connection,$mapper);
+        $lookup = new Lookup($this->connection, $mapper);
 
         $this->assertTransformerTransformsExactly(
             [
@@ -72,7 +72,6 @@ class LookupTest extends TestCase
         );
     }
 
-
     public function mapperProvider(): array
     {
         return [
@@ -91,7 +90,7 @@ class LookupTest extends TestCase
                         $output = (function ($input) use ($output) {
                             $lookup = (function ($input) use ($output) {
                                 try {
-                                    $dbh = new \PDO('sqlite:'.__DIR__.'/dbtest2.sqlite');
+                                    $dbh = new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite');
                                     $stmt = $dbh->prepare('SELECT nationality FROM user WHERE id = ?');
                                     $stmt->bindParam(1, $input["id"]);
                                     $stmt->execute();

@@ -10,7 +10,7 @@ class LoaderTest extends TestCase
 {
     use LoaderAssertTrait;
 
-    private const DATABASE_PATH = __DIR__ . '/dbtest2.sqlite';
+    private const DATABASE_PATH = __DIR__ . '/dbtest.sqlite';
     private \PDO $connection;
 
     protected function setUp(): void
@@ -22,63 +22,82 @@ class LoaderTest extends TestCase
 
     public function testLoadWithNamedParameters(): void
     {
+        $data = [
+            'firstname' => 'Lorem',
+            'lastname' => 'Ipsum',
+            'nationality' => 'French',
+        ];
+
         $loader = new Loader(
             connection: $this->connection,
-            query: 'INSERT INTO user (firstname,lastname,nationality) VALUES (:firstname,:lastname,:nationality)'
+            query: 'INSERT INTO user (firstname,lastname,nationality) VALUES (:firstname,:lastname,:nationality)',
+            parametersBinder: function (\PDOStatement $statement, $input) {
+                $statement->bindParam('firstname', $input["firstname"]);
+                $statement->bindParam('lastname', $input["lastname"]);
+                $statement->bindParam('nationality', $input["nationality"]);
+            },
         );
         $this->assertLoaderLoadsExactly(
             [
-                [
-                    'firstname' => 'jul',
-                    'lastname' => 'marseille',
-                    'nationality' => 'french',
-                ],
+                $data
             ],
             [
-                [
-                    'firstname' => 'jul',
-                    'lastname' => 'marseille',
-                    'nationality' => 'french',
-                ],
+                $data
             ],
             $loader,
         );
+
+        $statement = $this->connection->query(
+            'SELECT firstname,lastname,nationality FROM user WHERE firstname = "Lorem"'
+        );
+
+        $result = $statement->fetch(\PDO::FETCH_ASSOC);
+        $diff = array_diff_assoc($data, $result);
+        $this->assertEmpty($diff);
     }
 
     public function testLoadWithoutParameters(): void
     {
+        $data = [
+            'firstname' => 'Lorem',
+            'lastname' => 'Ipsum',
+            'nationality' => 'French',
+        ];
+
         $loader = new Loader(
             connection: $this->connection,
-            query: 'INSERT INTO user(firstname, lastname, nationality) VALUES ("jul","marseille","french")'
+            query: 'INSERT INTO user(firstname, lastname, nationality) VALUES ("Lorem","Ipsum","French")'
         );
 
         $this->assertLoaderLoadsExactly(
             [
-                [
-                    'firstname' => 'jul',
-                    'lastname' => 'marseille',
-                    'nationality' => 'french',
-                ],
+                $data
             ],
             [
-                [
-                    'firstname' => 'jul',
-                    'lastname' => 'marseille',
-                    'nationality' => 'french',
-                ],
+                $data
             ],
             $loader,
         );
+
+        $statement = $this->connection->query(
+            'SELECT firstname,lastname,nationality FROM user WHERE firstname = "Lorem"'
+        );
+
+        $result = $statement->fetch(\PDO::FETCH_ASSOC);
+        $diff = array_diff_assoc($data, $result);
+        $this->assertEmpty($diff);
     }
 
     public function loadProvider(): array
     {
         return [
             [
-                'coca', 2
+                'coca',
+                2
             ],
             [
-                'zero', 0
+                'zero',
+                0
             ]
         ];
     }
@@ -86,7 +105,7 @@ class LoaderTest extends TestCase
     /**
      * @dataProvider loadProvider
      */
-    public function testLoadWithBeforeQueries($name,$price): void
+    public function testLoadWithBeforeQueries($name, $price): void
     {
         $loader = new Loader(
             connection: $this->connection,
@@ -123,13 +142,13 @@ class LoaderTest extends TestCase
         $query = $this->connection->query("SELECT name FROM sqlite_master WHERE type='table' AND name='product'");
         $result = $query->fetch(\PDO::FETCH_NAMED);
 
-        $this->assertSame($result['name'],'product');
+        $this->assertSame($result['name'], 'product');
     }
 
     /**
      * @dataProvider loadProvider
      */
-    public function testLoadWithAfterQueries($name,$price): void
+    public function testLoadWithAfterQueries($name, $price): void
     {
         $loader = new Loader(
             connection: $this->connection,

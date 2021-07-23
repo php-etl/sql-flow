@@ -11,7 +11,7 @@ class ExtractorTest extends TestCase
 {
     use ExtractorAssertTrait;
 
-    private const DATABASE_PATH = __DIR__ . '/dbtest2.sqlite';
+    private const DATABASE_PATH = __DIR__ . '/dbtest.sqlite';
     private \PDO $connection;
 
     private mixed $logger;
@@ -79,7 +79,6 @@ class ExtractorTest extends TestCase
             ],
             $extractor,
         );
-
     }
 
 
@@ -188,7 +187,6 @@ class ExtractorTest extends TestCase
             ],
             $extractor
         );
-
     }
 
     public function testExtractWithBeforeQueriesAndNamedParameters(): void
@@ -197,8 +195,8 @@ class ExtractorTest extends TestCase
             connection: $this->connection,
             query: 'SELECT * FROM foo WHERE id = :id',
             parametersBinder: function (\PDOStatement $statement) {
-                    $var = 1;
-                    $statement->bindParam('id', $var);
+                $var = 1;
+                $statement->bindParam('id', $var);
             },
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL, value VARCHAR(255) NOT NULL)',
