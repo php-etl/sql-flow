@@ -4,7 +4,9 @@ namespace functional\Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Flow\SQL\Loader;
 use Kiboko\Component\PHPUnitExtension\Assert\LoaderAssertTrait;
+use Kiboko\Contract\Pipeline\PipelineRunnerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 
 class LoaderTest extends TestCase
 {
@@ -199,5 +201,12 @@ class LoaderTest extends TestCase
         parent::tearDown();
         chmod(self::DATABASE_PATH, 0644);
         unlink(self::DATABASE_PATH);
+    }
+
+    public function pipelineRunner(): PipelineRunnerInterface
+    {
+        return new \Kiboko\Component\Pipeline\PipelineRunner(
+            new NullLogger()
+        );
     }
 }
