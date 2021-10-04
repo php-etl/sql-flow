@@ -66,7 +66,7 @@ class ConditionalLoader implements LoaderInterface, FlushableInterface
     }
 
     /**
-     * @return ResultBucketInterface<Type>
+     * @return ResultBucketInterface
      */
     public function flush(): ResultBucketInterface
     {
