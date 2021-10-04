@@ -62,7 +62,7 @@ class Lookup implements TransformerInterface, FlushableInterface
     }
 
     /**
-     * @return ResultBucketInterface<Type>
+     * @return ResultBucketInterface
      */
     public function flush(): ResultBucketInterface
     {

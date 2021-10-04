@@ -4,6 +4,7 @@ namespace functional\Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Flow\SQL\Extractor;
 use Kiboko\Component\PHPUnitExtension\Assert\ExtractorAssertTrait;
+use Kiboko\Contract\Pipeline\PipelineRunnerInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -248,5 +249,10 @@ class ExtractorTest extends TestCase
         parent::tearDown();
         chmod(self::DATABASE_PATH, 0644);
         unlink(self::DATABASE_PATH);
+    }
+
+    public function pipelineRunner(): PipelineRunnerInterface
+    {
+        return new PipelineRunner();
     }
 }

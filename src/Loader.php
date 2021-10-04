@@ -72,7 +72,7 @@ class Loader implements LoaderInterface, FlushableInterface
     }
 
     /**
-     * @return ResultBucketInterface<Type>
+     * @return ResultBucketInterface
      */
     public function flush(): ResultBucketInterface
     {
