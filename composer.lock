@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "df9564b6f1b7dd9798f66d1b031759da",
+    "content-hash": "694bcc02d84197485f58f716ebad822e",
     "packages": [
         {
             "name": "nikic/php-parser",
@@ -2002,69 +2002,6 @@
                 "source": "https://github.com/php-etl/phpunit-extension/tree/master"
             },
             "time": "2021-09-28T18:53:56+00:00"
-        },
-        {
-            "name": "php-etl/pipeline",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-etl/pipeline.git",
-                "reference": "ecea800f6ee07fbeac07be4e07dfe05616181b71"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-etl/pipeline/zipball/ecea800f6ee07fbeac07be4e07dfe05616181b71",
-                "reference": "ecea800f6ee07fbeac07be4e07dfe05616181b71",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^8.0",
-                "php-etl/bucket": "^0.2.0",
-                "php-etl/bucket-contracts": "^0.1.0",
-                "php-etl/pipeline-contracts": "^0.3.0",
-                "psr/log": "^1.1"
-            },
-            "provide": {
-                "php-etl/pipeline-implementation": "0.3.0"
-            },
-            "require-dev": {
-                "johnkary/phpunit-speedtrap": "*",
-                "mybuilder/phpunit-accelerator": "*",
-                "phpunit/php-invoker": "*",
-                "phpunit/phpunit": "^9.0"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "0.4.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Kiboko\\Component\\Pipeline\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Kiboko SAS",
-                    "homepage": "http://kiboko.fr"
-                },
-                {
-                    "name": "Grégory Planchat",
-                    "email": "gregory@kiboko.fr"
-                }
-            ],
-            "description": "This library implements the Extract-Transform-Load pattern asynchronously in PHP with the help of iterators and generators",
-            "support": {
-                "issues": "https://github.com/php-etl/pipeline/issues",
-                "source": "https://github.com/php-etl/pipeline/tree/master"
-            },
-            "time": "2021-09-29T12:05:15+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
