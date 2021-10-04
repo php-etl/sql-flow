@@ -7,7 +7,6 @@ use Kiboko\Component\PHPUnitExtension\Assert\ExtractorAssertTrait;
 use Kiboko\Contract\Pipeline\PipelineRunnerInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 
 class ExtractorTest extends TestCase
 {
@@ -254,8 +253,6 @@ class ExtractorTest extends TestCase
 
     public function pipelineRunner(): PipelineRunnerInterface
     {
-        return new \Kiboko\Component\Pipeline\PipelineRunner(
-            new NullLogger()
-        );
+        return new PipelineRunner();
     }
 }

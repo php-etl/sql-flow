@@ -4,7 +4,6 @@ namespace functional\Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Flow\SQL\Lookup;
 use Kiboko\Component\PHPUnitExtension\Assert\TransformerAssertTrait;
-use Kiboko\Contract\Mapping\CompiledMapperInterface;
 use Kiboko\Contract\Pipeline\PipelineRunnerInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -126,8 +125,6 @@ class LookupTest extends TestCase
 
     public function pipelineRunner(): PipelineRunnerInterface
     {
-        return new \Kiboko\Component\Pipeline\PipelineRunner(
-            new NullLogger()
-        );
+        return new PipelineRunner();
     }
 }

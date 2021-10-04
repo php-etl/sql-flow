@@ -6,7 +6,6 @@ use Kiboko\Component\Flow\SQL\Loader;
 use Kiboko\Component\PHPUnitExtension\Assert\LoaderAssertTrait;
 use Kiboko\Contract\Pipeline\PipelineRunnerInterface;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\NullLogger;
 
 class LoaderTest extends TestCase
 {
@@ -205,8 +204,6 @@ class LoaderTest extends TestCase
 
     public function pipelineRunner(): PipelineRunnerInterface
     {
-        return new \Kiboko\Component\Pipeline\PipelineRunner(
-            new NullLogger()
-        );
+        return new PipelineRunner();
     }
 }
