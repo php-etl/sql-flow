@@ -54,8 +54,7 @@ class Extractor implements ExtractorInterface
 
             $statement->execute();
 
-            $results = $statement->fetchAll(\PDO::FETCH_NAMED);
-            while ($row = array_shift($results)) {
+            while ($row = $statement->fetch(\PDO::FETCH_NAMED)) {
                 yield new AcceptanceResultBucket($row);
             }
         } catch (\PDOException $exception) {
