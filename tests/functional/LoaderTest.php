@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace functional\Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Flow\SQL\Loader;
@@ -7,21 +9,31 @@ use Kiboko\Component\PHPUnitExtension\Assert\LoaderAssertTrait;
 use Kiboko\Contract\Pipeline\PipelineRunnerInterface;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ */
+#[\PHPUnit\Framework\Attributes\CoversNothing]
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class LoaderTest extends TestCase
 {
     use LoaderAssertTrait;
 
-    private const DATABASE_PATH = __DIR__ . '/dbtest.sqlite';
+    private const DATABASE_PATH = __DIR__.'/dbtest.sqlite';
     private \PDO $connection;
 
     protected function setUp(): void
     {
         parent::setUp();
-        copy(__DIR__ . '/fixtures/dbtest.sqlite', self::DATABASE_PATH);
-        $this->connection = new \PDO('sqlite:' . self::DATABASE_PATH);
+        copy(__DIR__.'/fixtures/dbtest.sqlite', self::DATABASE_PATH);
+        $this->connection = new \PDO('sqlite:'.self::DATABASE_PATH);
     }
 
-    public function testLoadWithNamedParameters(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function loadWithNamedParameters(): void
     {
         $data = [
             'firstname' => 'Lorem',
@@ -32,18 +44,18 @@ class LoaderTest extends TestCase
         $loader = new Loader(
             connection: $this->connection,
             query: 'INSERT INTO user (firstname,lastname,nationality) VALUES (:firstname,:lastname,:nationality)',
-            parametersBinder: function (\PDOStatement $statement, $input) {
-                $statement->bindParam('firstname', $input["firstname"]);
-                $statement->bindParam('lastname', $input["lastname"]);
-                $statement->bindParam('nationality', $input["nationality"]);
+            parametersBinder: function (\PDOStatement $statement, $input): void {
+                $statement->bindParam('firstname', $input['firstname']);
+                $statement->bindParam('lastname', $input['lastname']);
+                $statement->bindParam('nationality', $input['nationality']);
             },
         );
         $this->assertLoaderLoadsExactly(
             [
-                $data
+                $data,
             ],
             [
-                $data
+                $data,
             ],
             $loader,
         );
@@ -57,7 +69,8 @@ class LoaderTest extends TestCase
         $this->assertEmpty($diff);
     }
 
-    public function testLoadWithoutParameters(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function loadWithoutParameters(): void
     {
         $data = [
             'firstname' => 'Lorem',
@@ -72,10 +85,10 @@ class LoaderTest extends TestCase
 
         $this->assertLoaderLoadsExactly(
             [
-                $data
+                $data,
             ],
             [
-                $data
+                $data,
             ],
             $loader,
         );
@@ -89,31 +102,30 @@ class LoaderTest extends TestCase
         $this->assertEmpty($diff);
     }
 
-    public function loadProvider(): array
+    public static function loadProvider(): array
     {
         return [
             [
                 'coca',
-                2
+                2,
             ],
             [
                 'zero',
-                0
-            ]
+                0,
+            ],
         ];
     }
 
-    /**
-     * @dataProvider loadProvider
-     */
-    public function testLoadWithBeforeQueries($name, $price): void
+    #[\PHPUnit\Framework\Attributes\DataProvider('loadProvider')]
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function loadWithBeforeQueries(mixed $name, mixed $price): void
     {
         $loader = new Loader(
             connection: $this->connection,
             query: 'INSERT INTO product (name, price) VALUES (:name, :price)',
-            parametersBinder: function (\PDOStatement $statement, $input) {
-                $statement->bindParam('name', $input["name"]);
-                $statement->bindParam('price', $input["price"]);
+            parametersBinder: function (\PDOStatement $statement, $input): void {
+                $statement->bindParam('name', $input['name']);
+                $statement->bindParam('price', $input['price']);
             },
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS product (
@@ -146,17 +158,16 @@ class LoaderTest extends TestCase
         $this->assertSame($result['name'], 'product');
     }
 
-    /**
-     * @dataProvider loadProvider
-     */
-    public function testLoadWithAfterQueries($name, $price): void
+    #[\PHPUnit\Framework\Attributes\DataProvider('loadProvider')]
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function loadWithAfterQueries(mixed $name, mixed $price): void
     {
         $loader = new Loader(
             connection: $this->connection,
             query: 'INSERT INTO product (name, price) VALUES (:name, :price)',
-            parametersBinder: function (\PDOStatement $statement, $input) {
-                $statement->bindParam('name', $input["name"]);
-                $statement->bindParam('price', $input["price"]);
+            parametersBinder: function (\PDOStatement $statement, $input): void {
+                $statement->bindParam('name', $input['name']);
+                $statement->bindParam('price', $input['price']);
             },
             beforeQueries: [
                 'CREATE TABLE IF NOT EXISTS product (
@@ -187,7 +198,7 @@ class LoaderTest extends TestCase
         );
 
         /**
-         * Check if the table is dropped
+         * Check if the table is dropped.
          */
         $query = $this->connection->query("SELECT name FROM sqlite_master WHERE type='table' AND name='product'");
         $result = $query->fetch(\PDO::FETCH_NAMED);
@@ -198,7 +209,7 @@ class LoaderTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        chmod(self::DATABASE_PATH, 0644);
+        chmod(self::DATABASE_PATH, 0o644);
         unlink(self::DATABASE_PATH);
     }
 

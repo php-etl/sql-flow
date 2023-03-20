@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace functional\Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Flow\SQL\Lookup;
@@ -9,24 +11,32 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
+/**
+ * @internal
+ */
+#[\PHPUnit\Framework\Attributes\CoversNothing]
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class LookupTest extends TestCase
 {
     use TransformerAssertTrait;
 
-    private const DATABASE_PATH = __DIR__ . '/dbtest.sqlite';
+    private const DATABASE_PATH = __DIR__.'/dbtest.sqlite';
     private \PDO $connection;
 
     protected function setUp(): void
     {
         parent::setUp();
-        copy(__DIR__ . '/fixtures/dbtest.sqlite', self::DATABASE_PATH);
-        $this->connection = new \PDO('sqlite:' . self::DATABASE_PATH);
+        copy(__DIR__.'/fixtures/dbtest.sqlite', self::DATABASE_PATH);
+        $this->connection = new \PDO('sqlite:'.self::DATABASE_PATH);
     }
 
-    /**
-     * @dataProvider mapperProvider
-     */
-    public function testLookupWithMapper($mapper): void
+    #[\PHPUnit\Framework\Attributes\DataProvider('mapperProvider')]
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function lookupWithMapper(mixed $mapper): void
     {
         $lookup = new Lookup($this->connection, $mapper);
 
@@ -53,73 +63,70 @@ class LookupTest extends TestCase
                     'id' => 1,
                     'firstname' => 'Jean Pierre',
                     'lastname' => 'Martin',
-                    'nationality' => 'France'
+                    'nationality' => 'France',
                 ],
                 [
                     'id' => 2,
                     'firstname' => 'John',
                     'lastname' => 'Doe',
-                    'nationality' => 'English'
+                    'nationality' => 'English',
                 ],
                 [
                     'id' => 3,
                     'firstname' => 'Frank',
                     'lastname' => 'O\'hara',
-                    'nationality' => 'American'
+                    'nationality' => 'American',
                 ],
             ],
             $lookup
         );
     }
 
-    public function mapperProvider(): array
+    public static function mapperProvider(): array
     {
         return [
             [
-                new class implements \Kiboko\Contract\Mapping\CompiledMapperInterface {
-                    private LoggerInterface $logger;
-
-                    public function __construct(?LoggerInterface $logger = null)
+                new class() implements \Kiboko\Contract\Mapping\CompiledMapperInterface {
+                    public function __construct(private readonly LoggerInterface $logger = new NullLogger())
                     {
-                        $this->logger = $logger ?? new NullLogger();
                     }
 
                     public function __invoke($input, $output = null)
                     {
                         $output = $input;
-                        $output = (function ($input) use ($output) {
-                            $lookup = (function ($input) use ($output) {
+
+                        return (function ($input) use ($output) {
+                            $lookup = (function ($input) {
+                                $data = null;
                                 try {
                                     $dbh = new \PDO('sqlite:'.__DIR__.'/dbtest.sqlite');
                                     $stmt = $dbh->prepare('SELECT nationality FROM user WHERE id = ?');
-                                    $stmt->bindParam(1, $input["id"]);
+                                    $stmt->bindParam(1, $input['id']);
                                     $stmt->execute();
                                     $data = $stmt->fetch(\PDO::FETCH_NAMED);
                                 } catch (\PDOException $exception) {
                                     $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
                                 }
+
                                 return $data;
                             })($input);
-                            $output = (function () use ($lookup, $output) {
-                                $output = (function () use ($lookup, $output) {
-                                    $output['nationality'] = $lookup["nationality"];
-                                    return $output;
-                                })();
+
+                            return (fn () => (function () use ($lookup, $output) {
+                                $output['nationality'] = $lookup['nationality'];
+
                                 return $output;
-                            })();
-                            return $output;
+                            })())();
                         })($input);
-                        return $output;
                     }
-                }
-            ]
+                },
+            ],
         ];
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        chmod(self::DATABASE_PATH, 0644);
+        chmod(self::DATABASE_PATH, 0o644);
         unlink(self::DATABASE_PATH);
     }
 

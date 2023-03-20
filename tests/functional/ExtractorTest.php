@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace functional\Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Flow\SQL\Extractor;
@@ -8,11 +10,20 @@ use Kiboko\Contract\Pipeline\PipelineRunnerInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @internal
+ */
+#[\PHPUnit\Framework\Attributes\CoversNothing]
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class ExtractorTest extends TestCase
 {
     use ExtractorAssertTrait;
 
-    private const DATABASE_PATH = __DIR__ . '/dbtest.sqlite';
+    private const DATABASE_PATH = __DIR__.'/dbtest.sqlite';
     private \PDO $connection;
 
     private mixed $logger;
@@ -20,13 +31,14 @@ class ExtractorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        copy(__DIR__ . '/fixtures/dbtest.sqlite', self::DATABASE_PATH);
-        $this->connection = new \PDO('sqlite:' . self::DATABASE_PATH);
+        copy(__DIR__.'/fixtures/dbtest.sqlite', self::DATABASE_PATH);
+        $this->connection = new \PDO('sqlite:'.self::DATABASE_PATH);
 
         $this->logger = $this->createMock(LoggerInterface::class);
     }
 
-    public function testBasicExtract(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function basicExtract(): void
     {
         $extractor = new Extractor(
             connection: $this->connection,
@@ -39,32 +51,33 @@ class ExtractorTest extends TestCase
                     'id' => '1',
                     'firstname' => 'Jean Pierre',
                     'lastname' => 'Martin',
-                    'nationality' => 'France'
+                    'nationality' => 'France',
                 ],
                 [
                     'id' => '2',
                     'firstname' => 'John',
                     'lastname' => 'Doe',
-                    'nationality' => 'English'
+                    'nationality' => 'English',
                 ],
                 [
                     'id' => '3',
                     'firstname' => 'Frank',
                     'lastname' => 'O\'hara',
-                    'nationality' => 'American'
+                    'nationality' => 'American',
                 ],
                 [
                     'id' => '4',
                     'firstname' => 'Barry',
                     'lastname' => 'Tatum',
-                    'nationality' => 'Swiss'
-                ]
+                    'nationality' => 'Swiss',
+                ],
             ],
             $extractor,
         );
     }
 
-    public function testLogOnExceptionOnExtract(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function logOnExceptionOnExtract(): void
     {
         $extractor = new Extractor(
             connection: $this->connection,
@@ -73,7 +86,8 @@ class ExtractorTest extends TestCase
         );
 
         $this->logger->expects($this->once())
-            ->method('critical');
+            ->method('critical')
+        ;
 
         $this->assertExtractorExtractsExactly(
             [
@@ -82,8 +96,8 @@ class ExtractorTest extends TestCase
         );
     }
 
-
-    public function testExtractWithBeforeQueries(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function extractWithBeforeQueries(): void
     {
         $extractor = new Extractor(
             connection: $this->connection,
@@ -104,13 +118,14 @@ class ExtractorTest extends TestCase
                 [
                     'id' => '2',
                     'value' => 'Sit amet consecutir',
-                ]
+                ],
             ],
             $extractor,
         );
     }
 
-    public function testExtractLogOnExceptionWithBeforeQueries(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function extractLogOnExceptionWithBeforeQueries(): void
     {
         $extractor = new Extractor(
             connection: $this->connection,
@@ -122,7 +137,8 @@ class ExtractorTest extends TestCase
         );
 
         $this->logger->expects($this->once())
-            ->method('critical');
+            ->method('critical')
+        ;
 
         $this->assertExtractorExtractsExactly(
             [
@@ -131,7 +147,8 @@ class ExtractorTest extends TestCase
         );
     }
 
-    public function testExtractWithAfterQueries(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function extractWithAfterQueries(): void
     {
         $extractor = new Extractor(
             connection: $this->connection,
@@ -141,7 +158,7 @@ class ExtractorTest extends TestCase
                 'INSERT INTO foo (id,value) VALUES (1,"test")',
             ],
             afterQueries: [
-               'DROP TABLE foo'
+                'DROP TABLE foo',
             ]
         );
 
@@ -149,8 +166,8 @@ class ExtractorTest extends TestCase
             [
                 [
                     'id' => '1',
-                    'value' => 'test'
-                ]
+                    'value' => 'test',
+                ],
             ],
             $extractor
         );
@@ -161,7 +178,8 @@ class ExtractorTest extends TestCase
         $this->assertFalse($result);
     }
 
-    public function testExtractLogOnExceptionWithAfterQueries(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function extractLogOnExceptionWithAfterQueries(): void
     {
         $extractor = new Extractor(
             connection: $this->connection,
@@ -171,31 +189,33 @@ class ExtractorTest extends TestCase
                 'INSERT INTO foo (id,value) VALUES (1,"test")',
             ],
             afterQueries: [
-                'WRONGSQL'
+                'WRONGSQL',
             ],
             logger: $this->logger
         );
 
         $this->logger->expects($this->once())
-            ->method('critical');
+            ->method('critical')
+        ;
 
         $this->assertExtractorExtractsExactly(
             [
                 [
                     'id' => '1',
-                    'value' => 'test'
-                ]
+                    'value' => 'test',
+                ],
             ],
             $extractor
         );
     }
 
-    public function testExtractWithBeforeQueriesAndNamedParameters(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function extractWithBeforeQueriesAndNamedParameters(): void
     {
         $extractor = new Extractor(
             connection: $this->connection,
             query: 'SELECT * FROM foo WHERE id = :id',
-            parametersBinder: function (\PDOStatement $statement) {
+            parametersBinder: function (\PDOStatement $statement): void {
                 $var = 1;
                 $statement->bindParam('id', $var);
             },
@@ -211,18 +231,19 @@ class ExtractorTest extends TestCase
                 [
                     'id' => '1',
                     'value' => 'Lorem ipsum dolor',
-                ]
+                ],
             ],
             $extractor
         );
     }
 
-    public function testExtractWithBeforeQueriesAndUnnamedParameters(): void
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function extractWithBeforeQueriesAndUnnamedParameters(): void
     {
         $extractor = new Extractor(
             connection: $this->connection,
             query: 'SELECT * FROM foo WHERE id = ?',
-            parametersBinder: function (\PDOStatement $statement) {
+            parametersBinder: function (\PDOStatement $statement): void {
                 $var = 1;
                 $statement->bindParam(1, $var);
             },
@@ -238,7 +259,7 @@ class ExtractorTest extends TestCase
                 [
                     'id' => '1',
                     'value' => 'Lorem ipsum dolor',
-                ]
+                ],
             ],
             $extractor
         );
@@ -247,7 +268,7 @@ class ExtractorTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        chmod(self::DATABASE_PATH, 0644);
+        chmod(self::DATABASE_PATH, 0o644);
         unlink(self::DATABASE_PATH);
     }
 
