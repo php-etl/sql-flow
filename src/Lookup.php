@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Bucket\AcceptanceResultBucket;
 use Kiboko\Component\Bucket\EmptyResultBucket;
-use Kiboko\Contract\Bucket\ResultBucketInterface;
 use Kiboko\Contract\Mapping\CompiledMapperInterface;
 use Kiboko\Contract\Pipeline\FlushableInterface;
 use Kiboko\Contract\Pipeline\TransformerInterface;
@@ -13,27 +14,18 @@ use Psr\Log\NullLogger;
 
 /**
  * @template Type
+ *
  * @implements FlushableInterface<Type>
  */
 class Lookup implements TransformerInterface, FlushableInterface
 {
-    private LoggerInterface $logger;
-
     /**
-     * @param \PDO $connection
      * @param CompiledMapperInterface<mixed,mixed,mixed> $mapper
-     * @param array<int,string> $beforeQueries
-     * @param array<int,string> $afterQueries
-     * @param \Psr\Log\LoggerInterface|null $logger
+     * @param array<int,string>                          $beforeQueries
+     * @param array<int,string>                          $afterQueries
      */
-    public function __construct(
-        private \PDO $connection,
-        private CompiledMapperInterface $mapper,
-        private array $beforeQueries = [],
-        private array $afterQueries = [],
-        ?LoggerInterface $logger = null
-    ) {
-        $this->logger = $logger ?? new NullLogger();
+    public function __construct(private readonly \PDO $connection, private readonly CompiledMapperInterface $mapper, private readonly array $beforeQueries = [], private readonly array $afterQueries = [], private readonly LoggerInterface $logger = new NullLogger())
+    {
     }
 
     /**
@@ -47,6 +39,7 @@ class Lookup implements TransformerInterface, FlushableInterface
             }
         } catch (\PDOException $exception) {
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
+
             return;
         }
 
@@ -61,10 +54,7 @@ class Lookup implements TransformerInterface, FlushableInterface
         }
     }
 
-    /**
-     * @return ResultBucketInterface
-     */
-    public function flush(): ResultBucketInterface
+    public function flush(): EmptyResultBucket
     {
         try {
             foreach ($this->afterQueries as $afterQuery) {

@@ -1,42 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Kiboko\Component\Flow\SQL;
 
 use Kiboko\Component\Bucket\AcceptanceResultBucket;
 use Kiboko\Component\Bucket\EmptyResultBucket;
-use Kiboko\Contract\Bucket\ResultBucketInterface;
-use Kiboko\Contract\Mapping\CompiledMapperInterface;
 use Kiboko\Contract\Pipeline\FlushableInterface;
 use Kiboko\Contract\Pipeline\LoaderInterface;
-use Kiboko\Contract\Pipeline\TransformerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 /**
  * @template Type
+ *
  * @implements FlushableInterface<Type>
  */
 class ConditionalLoader implements LoaderInterface, FlushableInterface
 {
-    private LoggerInterface $logger;
     /** @var callable|null */
     private $alternatives;
 
     /**
-     * @param \PDO $connection
-     * @param callable|null $alternatives
      * @param array<int,string> $beforeQueries
      * @param array<int,string> $afterQueries
-     * @param \Psr\Log\LoggerInterface|null $logger
      */
     public function __construct(
-        private \PDO $connection,
+        private readonly \PDO $connection,
         callable $alternatives = null,
-        private array $beforeQueries = [],
-        private array $afterQueries = [],
-        ?LoggerInterface $logger = null
+        private readonly array $beforeQueries = [],
+        private readonly array $afterQueries = [],
+        private readonly LoggerInterface $logger = new NullLogger()
     ) {
-        $this->logger = $logger ?? new NullLogger();
         $this->alternatives = $alternatives;
     }
 
@@ -51,6 +46,7 @@ class ConditionalLoader implements LoaderInterface, FlushableInterface
             }
         } catch (\PDOException $exception) {
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
+
             return;
         }
 
@@ -65,10 +61,7 @@ class ConditionalLoader implements LoaderInterface, FlushableInterface
         } while ($input = yield new AcceptanceResultBucket($input));
     }
 
-    /**
-     * @return ResultBucketInterface
-     */
-    public function flush(): ResultBucketInterface
+    public function flush(): EmptyResultBucket
     {
         try {
             foreach ($this->afterQueries as $afterQuery) {
