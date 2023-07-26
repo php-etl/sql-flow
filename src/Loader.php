@@ -63,7 +63,7 @@ class Loader implements LoaderInterface, FlushableInterface
 
                 $statement->execute();
             } catch (\PDOException $exception) {
-                $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
+                $this->logger->critical($exception->getMessage(), ['exception' => $exception, 'item' => $input]);
             }
         } while ($input = yield new AcceptanceResultBucket($input));
     }
