@@ -48,25 +48,25 @@ class ExtractorTest extends TestCase
         $this->assertExtractorExtractsExactly(
             [
                 [
-                    'id' => '1',
+                    'id' => 1,
                     'firstname' => 'Jean Pierre',
                     'lastname' => 'Martin',
                     'nationality' => 'France',
                 ],
                 [
-                    'id' => '2',
+                    'id' => 2,
                     'firstname' => 'John',
                     'lastname' => 'Doe',
                     'nationality' => 'English',
                 ],
                 [
-                    'id' => '3',
+                    'id' => 3,
                     'firstname' => 'Frank',
                     'lastname' => 'O\'hara',
                     'nationality' => 'American',
                 ],
                 [
-                    'id' => '4',
+                    'id' => 4,
                     'firstname' => 'Barry',
                     'lastname' => 'Tatum',
                     'nationality' => 'Swiss',
@@ -112,11 +112,11 @@ class ExtractorTest extends TestCase
         $this->assertExtractorExtractsExactly(
             [
                 [
-                    'id' => '1',
+                    'id' => 1,
                     'value' => 'Lorem ipsum dolor',
                 ],
                 [
-                    'id' => '2',
+                    'id' => 2,
                     'value' => 'Sit amet consecutir',
                 ],
             ],
@@ -165,7 +165,7 @@ class ExtractorTest extends TestCase
         $this->assertExtractorExtractsExactly(
             [
                 [
-                    'id' => '1',
+                    'id' => 1,
                     'value' => 'test',
                 ],
             ],
@@ -201,7 +201,7 @@ class ExtractorTest extends TestCase
         $this->assertExtractorExtractsExactly(
             [
                 [
-                    'id' => '1',
+                    'id' => 1,
                     'value' => 'test',
                 ],
             ],
@@ -229,7 +229,7 @@ class ExtractorTest extends TestCase
         $this->assertExtractorExtractsExactly(
             [
                 [
-                    'id' => '1',
+                    'id' => 1,
                     'value' => 'Lorem ipsum dolor',
                 ],
             ],
@@ -257,7 +257,7 @@ class ExtractorTest extends TestCase
         $this->assertExtractorExtractsExactly(
             [
                 [
-                    'id' => '1',
+                    'id' => 1,
                     'value' => 'Lorem ipsum dolor',
                 ],
             ],
