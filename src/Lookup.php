@@ -43,14 +43,14 @@ class Lookup implements TransformerInterface, FlushableInterface
             return;
         }
 
-        try {
-            $line = yield;
+        $line = yield;
 
+        try {
             do {
                 $line = ($this->mapper)($line);
             } while ($line = (yield new AcceptanceResultBucket($line)));
         } catch (\PDOException $exception) {
-            $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
+            $this->logger->critical($exception->getMessage(), ['exception' => $exception, 'item' => $line]);
         }
     }
 
