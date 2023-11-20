@@ -24,9 +24,7 @@ class Lookup implements TransformerInterface, FlushableInterface
      * @param array<int,string>                          $beforeQueries
      * @param array<int,string>                          $afterQueries
      */
-    public function __construct(private readonly \PDO $connection, private readonly CompiledMapperInterface $mapper, private readonly array $beforeQueries = [], private readonly array $afterQueries = [], private readonly LoggerInterface $logger = new NullLogger())
-    {
-    }
+    public function __construct(private readonly \PDO $connection, private readonly CompiledMapperInterface $mapper, private readonly array $beforeQueries = [], private readonly array $afterQueries = [], private readonly LoggerInterface $logger = new NullLogger()) {}
 
     /**
      * @return \Generator<mixed>
